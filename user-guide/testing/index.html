@@ -234,9 +234,61 @@
 </span><span class='line'><span class="k">class</span> <span class="nc">ExampleThriftServerFeatureTest</span> <span class="k">extends</span> <span class="nc">FeatureTest</span> <span class="o">{</span>
 </span><span class='line'>  <span class="k">override</span> <span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">EmbeddedThriftServer</span><span class="o">(</span><span class="k">new</span> <span class="nc">ExampleThriftServer</span><span class="o">)</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="n">server</span><span class="o">.</span><span class="n">thriftClient</span><span class="o">[</span><span class="kt">ExampleThrift</span><span class="o">[</span><span class="kt">Future</span><span class="o">]](</span><span class="n">clientId</span> <span class="k">=</span> <span class="s">&quot;client123&quot;</span><span class="o">)</span>
+</span><span class='line'>  <span class="k">lazy</span> <span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="n">server</span><span class="o">.</span><span class="n">thriftClient</span><span class="o">[</span><span class="kt">ExampleThrift</span><span class="o">[</span><span class="kt">Future</span><span class="o">]](</span><span class="n">clientId</span> <span class="k">=</span> <span class="s">&quot;client123&quot;</span><span class="o">)</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="s">&quot;MyTest&quot;</span> <span class="n">should</span> <span class="o">{</span>
+</span><span class='line'>    <span class="s">&quot;return data accordingly&quot;</span> <span class="n">in</span> <span class="o">{</span>
+</span><span class='line'>      <span class="nc">Await</span><span class="o">.</span><span class="n">result</span><span class="o">(</span><span class="n">client</span><span class="o">.</span><span class="n">doExample</span><span class="o">(</span><span class="s">&quot;input&quot;</span><span class="o">))</span> <span class="n">should</span> <span class="n">equal</span><span class="o">(</span><span class="s">&quot;output&quot;</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<div></div>
+
+
+<p>If you are extending both <code>com.twitter.finatra.http.HttpServer</code> <strong>and</strong> <code>com.twitter.finatra.thrift.ThriftServer</code> then you can feature test by constructing an <code>EmbeddedHttpServer with ThriftClient</code>, e.g.,</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">import</span> <span class="nn">com.twitter.finatra.http.EmbeddedHttpServer</span>
+</span><span class='line'><span class="k">import</span> <span class="nn">com.twitter.inject.server.FeatureTest</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">ExampleCombinedServerFeatureTest</span> <span class="k">extends</span> <span class="nc">FeatureTest</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">override</span> <span class="k">val</span> <span class="n">server</span> <span class="k">=</span>
+</span><span class='line'>    <span class="k">new</span> <span class="nc">EmbeddedHttpServer</span><span class="o">(</span><span class="k">new</span> <span class="nc">ExampleCombinedServer</span><span class="o">)</span> <span class="k">with</span> <span class="nc">ThriftClient</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">lazy</span> <span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="n">server</span><span class="o">.</span><span class="n">thriftClient</span><span class="o">[</span><span class="kt">ExampleThrift</span><span class="o">[</span><span class="kt">Future</span><span class="o">]](</span><span class="n">clientId</span> <span class="k">=</span> <span class="s">&quot;client123&quot;</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="s">&quot;MyTest&quot;</span> <span class="n">should</span> <span class="o">{</span>
+</span><span class='line'>    <span class="s">&quot;perform feature&quot;</span> <span class="n">in</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">server</span><span class="o">.</span><span class="n">httpGet</span><span class="o">(</span>
+</span><span class='line'>        <span class="n">path</span> <span class="k">=</span> <span class="s">&quot;/&quot;</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">andExpect</span> <span class="k">=</span> <span class="nc">Status</span><span class="o">.</span><span class="nc">Ok</span><span class="o">)</span>
+</span><span class='line'>        <span class="o">...</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
 </span><span class='line'>    <span class="s">&quot;return data accordingly&quot;</span> <span class="n">in</span> <span class="o">{</span>
 </span><span class='line'>      <span class="nc">Await</span><span class="o">.</span><span class="n">result</span><span class="o">(</span><span class="n">client</span><span class="o">.</span><span class="n">doExample</span><span class="o">(</span><span class="s">&quot;input&quot;</span><span class="o">))</span> <span class="n">should</span> <span class="n">equal</span><span class="o">(</span><span class="s">&quot;output&quot;</span><span class="o">)</span>
 </span><span class='line'>    <span class="o">}</span>
@@ -252,7 +304,14 @@
 
 <p>The <code>server</code> is specified as a <code>def</code> in <code>com.twitter.inject.server.FeatureTest</code> trait. If you only want to start <strong>one instance of your server per test file</strong> make sure to override this <code>def</code> with a <code>val</code>.</p>
 
-<p>For more advanced examples see the <a href="https://github.com/twitter/finatra/blob/develop/http/src/test/scala/com/twitter/finatra/http/tests/integration/doeverything/test/DoEverythingServerFeatureTest.scala"><code>DoEverythingServerFeatureTest</code></a> for HTTP and the <a href="https://github.com/twitter/finatra/blob/develop/thrift/src/test/scala/com/twitter/finatra/thrift/tests/DoEverythingThriftServerFeatureTest.scala"><code>DoEverythingThriftServerFeatureTest</code></a> for Thrift.</p>
+<p>For more advanced examples see:</p>
+
+<ul>
+<li>the <a href="https://github.com/twitter/finatra/blob/develop/http/src/test/scala/com/twitter/finatra/http/tests/integration/doeverything/test/DoEverythingServerFeatureTest.scala"><code>DoEverythingServerFeatureTest</code></a> for an HTTP server.</li>
+<li>the <a href="https://github.com/twitter/finatra/blob/develop/thrift/src/test/scala/com/twitter/finatra/thrift/tests/DoEverythingThriftServerFeatureTest.scala"><code>DoEverythingThriftServerFeatureTest</code></a> for a Thrift server.</li>
+<li>the <a href="https://github.com/twitter/finatra/blob/develop/inject-thrift-client-http-mapper/src/test/scala/com/twitter/finatra/multiserver/test/DoEverythingCombinedServerFeatureTest.scala"><code>DoEverythingCombinedServerFeatureTest</code></a> for &ldquo;combined&rdquo; HTTP and Thrift server.</li>
+</ul>
+
 
 <h3><a class="anchor" name="integration-tests" href="#integration-tests">Integration Tests</a></h3>
 
