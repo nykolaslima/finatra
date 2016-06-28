@@ -203,7 +203,7 @@
 
 <p>Note, in the example above we implement the <code>ExampleService.BaseServiceIface#add1</code> method to satisfy the <code>ExampleService.BaseServiceIface</code> interface &ndash; however, the framework will not call the <code>add1</code> method in this way as it uses the implementation of the thrift method captured by the <code>handle(ThriftMethod)</code> function (as mentioned above this in order to apply the configured filter chain to requests). Thus if you were to directly call <code>ExampleThriftController.add1(request)</code> this would by-pass any configured <a href="/finatra/user-guide/build-new-thrift-server/filter.html">filters</a> from the server definition.</p>
 
-<p>We use <code>override val</code> since the computed <a href="https://github.com/twitter/finatra/blob/develop/thrift/src/main/scala/com/twitter/finatra/thrift/internal/ThriftMethodService.scala"><code>ThriftMethodService</code></a> returned <a href="https://github.com/twitter/finatra/blob/develop/thrift/src/main/scala/com/twitter/finatra/thrift/Controller.scala#L19">is a val</a>.</p>
+<p>We use <code>override val</code> since the computed <a href="https://github.com/twitter/finatra/blob/develop/thrift/src/main/scala/com/twitter/finatra/thrift/internal/ThriftMethodService.scala"><code>ThriftMethodService</code></a> instance returned <a href="https://github.com/twitter/finatra/blob/develop/thrift/src/main/scala/com/twitter/finatra/thrift/Controller.scala#L19">is effectively constant</a>.</p>
 
 <p>As previously shown, the server can then be defined with this Thrift Controller:</p>
 
