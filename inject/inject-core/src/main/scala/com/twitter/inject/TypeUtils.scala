@@ -8,7 +8,9 @@ object TypeUtils {
   def singleTypeParam[T](objType: Type) = {
     objType match {
       case parametricType: ParameterizedTypeImpl =>
-        parametricType.getActualTypeArguments.head
+        parametricType.getActualTypeArguments
+          .filter(_.asInstanceOf[Class[_]] != classOf[Object])
+          .head
     }
   }
 }
